@@ -1,5 +1,8 @@
 package demo.com.testemployees.screens.employees;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -21,11 +24,11 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
-public class EmployeeListActivity extends AppCompatActivity implements EmployeesListView{
+public class EmployeeListActivity extends AppCompatActivity {
 
     private RecyclerView recyclerViewEmployees;
     private EmployeeAdapter adapter;
-    private EmployeeListPresenter presenter;
+    private EmployeeViewModel viewModel;
 
 
     @Override
@@ -41,36 +44,31 @@ public class EmployeeListActivity extends AppCompatActivity implements Employees
         recyclerViewEmployees.setLayoutManager(new LinearLayoutManager(this));
         recyclerViewEmployees.setAdapter(adapter);
 
-        presenter = new EmployeeListPresenter(this);
-        presenter.loaddata();
+        viewModel = ViewModelProviders.of(this).get(EmployeeViewModel.class);
+        viewModel.getEmployees().observe(this, new Observer<List<Employee>>() {
+            @Override
+            public void onChanged(@Nullable List<Employee> employees) {
+                adapter.setEmployees(employees);
+            }
+        });
+
+        viewModel.getErrors().observe(this, new Observer<Throwable>() {
+            @Override
+            public void onChanged(@Nullable Throwable throwable) {
+               if (throwable != null){
+                   Toast.makeText(EmployeeListActivity.this, "Error", Toast.LENGTH_SHORT).show();
+                   viewModel.clearErrors();
+               }
+            }
+        });
+        viewModel.loaddata();
+
 
 
 
 
     }
 
-    @Override
-    public void showData(List<Employee> employees) {
-        adapter.setEmployees(employees);
-    }
 
-    @Override
-    public void showError() {
-        Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show();
-    }
-
-    //    public void showData(List<Employee> employees){
-//        adapter.setEmployees(employees);
-//    }
-//
-//    public void showError(){
-//        Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show();
-//    }
-    
-    @Override
-    protected void onDestroy() {
-        presenter.disposeDisposable();
-        super.onDestroy();
-    }
 }
 
