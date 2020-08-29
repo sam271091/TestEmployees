@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import demo.com.testemployees.api.ApiFactory;
 import demo.com.testemployees.api.ApiService;
 import demo.com.testemployees.pojo.Employee;
 import demo.com.testemployees.pojo.EmployeeResponse;
+import demo.com.testemployees.pojo.Speciality;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
@@ -49,6 +51,16 @@ public class EmployeeListActivity extends AppCompatActivity {
             @Override
             public void onChanged(@Nullable List<Employee> employees) {
                 adapter.setEmployees(employees);
+                if (employees != null){
+                    for (Employee employee : employees){
+                        List<Speciality> specialities = employee.getSpecialty();
+                        for (Speciality speciality : specialities){
+                            Log.i("Speciality",speciality.getName());
+                        }
+
+                    }
+                }
+
             }
         });
 
